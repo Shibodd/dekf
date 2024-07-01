@@ -1,7 +1,7 @@
 #include <optional>
 #include <tuple>
 
-#include "lateral_ekf/dekf_types.hpp"
+#include "dekf/types.hpp"
 
 /**
 * @param P Old covariance
@@ -92,16 +92,6 @@ class DEKF {
     ekf_update(state, hx, z.measurement(), H, z.covariance());
   }
 
-public:
-  DEKF(SysT system_model, VectorCovariancePair<State> initial_state, VectorCovariancePair<Parameters> initial_parameters,  MeasTs... measurement_models)
-      : m_state(initial_state),
-        m_parameters(initial_parameters),
-        m_system_model(system_model),
-        m_measurement_models(measurement_models...) 
-  {
-    
-  }
-
   template <size_t... Idxs>
   void process_measurements(std::index_sequence<Idxs...>, const VectorCovariancePair<State>& prior_state, const VectorCovariancePair<Parameters>& prior_parameters) {
     ([&]{
@@ -118,6 +108,16 @@ public:
         z.reset();
       }
     }(), ...);
+  }
+
+public:
+  DEKF(SysT system_model, VectorCovariancePair<State> initial_state, VectorCovariancePair<Parameters> initial_parameters,  MeasTs... measurement_models)
+      : m_state(initial_state),
+        m_parameters(initial_parameters),
+        m_system_model(system_model),
+        m_measurement_models(measurement_models...) 
+  {
+    
   }
 
   void step(Control u) {
